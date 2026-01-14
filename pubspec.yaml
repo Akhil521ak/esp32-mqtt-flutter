@@ -1,0 +1,18 @@
+name: esp32_mqtt_app
+description: ESP32 MQTT Flutter App with User Settings
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  mqtt_client: ^10.2.0
+  shared_preferences: ^2.2.2
+
+flutter:
+  uses-material-design: true
