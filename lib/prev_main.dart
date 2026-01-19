@@ -115,8 +115,6 @@ class _DashboardState extends State<Dashboard> {
     setState(() {});
   }
 
-  /* ===================== MQTT SETTINGS ===================== */
-
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     brokerCtrl.text = prefs.getString("broker") ?? "";
@@ -126,17 +124,6 @@ class _DashboardState extends State<Dashboard> {
 
     if (brokerCtrl.text.isNotEmpty) connectMQTT();
   }
-
-  Future<void> saveSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("broker", brokerCtrl.text);
-    await prefs.setString("port", portCtrl.text);
-    await prefs.setString("username", userCtrl.text);
-    await prefs.setString("password", passCtrl.text);
-    connectMQTT();
-  }
-
-  /* ===================== MQTT ===================== */
 
   Future<void> connectMQTT() async {
     client = MqttServerClient(
@@ -172,8 +159,6 @@ class _DashboardState extends State<Dashboard> {
     b.addString(msg);
     client.publishMessage(topic, MqttQos.atMostOnce, b.payload!);
   }
-
-  /* ===================== UI ===================== */
 
   Widget buildWidget(DashboardItem item) {
     return Card(
@@ -229,13 +214,7 @@ class _DashboardState extends State<Dashboard> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SettingsPage(
-          brokerCtrl: brokerCtrl,
-          portCtrl: portCtrl,
-          userCtrl: userCtrl,
-          passCtrl: passCtrl,
-          onSave: saveSettings,
-        ),
+        builder: (_) => SettingsPage(widgets: widgets),
       ),
     );
     widgets = await loadDashboard();
@@ -274,20 +253,8 @@ class _DashboardState extends State<Dashboard> {
 /* ===================== SETTINGS PAGE ===================== */
 
 class SettingsPage extends StatelessWidget {
-  final TextEditingController brokerCtrl;
-  final TextEditingController portCtrl;
-  final TextEditingController userCtrl;
-  final TextEditingController passCtrl;
-  final VoidCallback onSave;
-
-  const SettingsPage({
-    super.key,
-    required this.brokerCtrl,
-    required this.portCtrl,
-    required this.userCtrl,
-    required this.passCtrl,
-    required this.onSave,
-  });
+  final List<DashboardItem> widgets;
+  const SettingsPage({super.key, required this.widgets});
 
   @override
   Widget build(BuildContext context) {
@@ -295,38 +262,16 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(title: const Text("Settings")),
       body: Padding(
         padding: const EdgeInsets.all(12),
-        child: ListView(
+        child: Column(
           children: [
-            const Text("MQTT Settings",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            TextField(
-                controller: brokerCtrl,
-                decoration: const InputDecoration(labelText: "Broker URL")),
-            TextField(
-                controller: portCtrl,
-                decoration: const InputDecoration(labelText: "Port")),
-            TextField(
-                controller: userCtrl,
-                decoration: const InputDecoration(labelText: "Username")),
-            TextField(
-                controller: passCtrl,
-                decoration: const InputDecoration(labelText: "Password"),
-                obscureText: true),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                onSave();
-                Navigator.pop(context);
-              },
-              child: const Text("SAVE & CONNECT"),
-            ),
-            const Divider(),
             ElevatedButton(
               child: const Text("Edit Dashboard Widgets"),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const EditDashboardPage()),
+                  MaterialPageRoute(
+                    builder: (_) => EditDashboardPage(),
+                  ),
                 );
               },
             ),
